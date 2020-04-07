@@ -3,6 +3,10 @@ library('car')
 library('alr3')
 library('faraway')
 
+# install.packages('tidyverse', dependencies = TRUE)
+# install.packages('rmarkdown', dependencies = TRUE)
+# install.packages("tinytex", dependencies=TRUE)
+
 # I/O
 # read data from url csv into data.frame object
 d <- read.csv('https://stats.idre.ucla.edu/wp-content/uploads/2019/02/elemapi2v2.csv')
@@ -85,6 +89,7 @@ mean(d$api00)
 
 # break down this error to two part using the predicted value from regression of api00 by predicted variable enroll.
 
+$latex y
 # yi−y¯=yi−yi^+yi^−y¯
 
 # where y¯ is the mean of response, yi^ is the fitted value from the regression model including predictor variable and yi is the observed response.
@@ -208,4 +213,63 @@ car::vif(m2)
 
 # construct added variable (partial regression) plots
 avPlots(m2)
+
+class(d$api00)
+class(d$yr_rnd)
+class(d$mealcat)
+
+summary(d$api00)
+summary(d$yr_rnd)
+summary(d$mealcat)
+
+# frequency table
+table(d$api00)
+table(d$yr_rnd)
+table(d$mealcat)
+
+# encode vector as a factor
+d$yr_rnd_F <- factor(d$yr_rnd)
+d$mealcat_F <- factor(d$mealcat)
+
+# factor returns object of class "factor"
+class(d$yr_rnd_F)
+class(d$mealcat_F)
+
+# fit simpple regression model of api00 on yr_rnd_F
+m3 <- lm(api00 ~ yr_rnd_F, data = d)
+summary(m3)
+
+# scatter plot of api00 vs yr_rnd 
+plot(api00 ~yr_rnd, data=d)
+# add regression line
+abline(m3)
+
+mean(api00[yr_rnd_F == "0"])
+
+aggregate(api00 ~ yr_rnd_F, FUN=mean, data=d)
+
+mean(d$api00[d$yr_rnd_F == "1"])
+
+t.test(api00 ~ yr_rnd_F, data=d, var.equal = TRUE)
+
+anova(m3)
+
+# square of t val from t test == anova F value
+10.7815^2
+
+# fit model 4 simple regression, api00 on mealcat with 4 levels
+m4 <- lm(api00 ~ mealcat_F, data=d)
+summary(m4)
+
+# 'aggregate' subsets and summarizes
+# aggregate mean of api00 for each category in mealcat_F
+aggregate(api00 ~ mealcat_F, FUN=mean, data=d)
+
+# relevel factor mealcat_F and make group "3" as the reference group
+d$mealcat_F <- relevel(d$mealcat_F, ref='3')
+
+# fit model 5
+m5 <- lm(api00 ~ mealcat_F, data=d)
+summary(m5)
+
 
