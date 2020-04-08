@@ -1,11 +1,14 @@
-# Import packages
-library('car')
-library('alr3')
-library('faraway')
-
+# Load libraries
 # install.packages('tidyverse', dependencies = TRUE)
 # install.packages('rmarkdown', dependencies = TRUE)
 # install.packages("tinytex", dependencies=TRUE)
+
+# Import libraries
+library('car')
+library('alr3')
+library('faraway')
+library('lmtest')
+library('sandwich')
 
 # I/O
 # read data from url csv into data.frame object
@@ -193,26 +196,38 @@ influencePlot(m2, main = "Influence Plot", sub = "Circle size is proportional
 # inspect influence with diagnostic plots
 infIndexPlot(m2)
 
-# test for homoskedasticity using scatter plot of residuals vs fitted vals
+# Check for homoskedasticity
+# check for homoskedasticity using scatter plot of residuals vs fitted vals
 plot(m2$residuals ~ m2$fitted.values)
 abline(h=0, lty = 2) # add horizontal line at 0
 
-# plot residual vs fitted val and all predictors, and test for curvature
+# calculate robust standard errors with lmtest and sandwich
+coeftest(m2, vcov = vcovHC(m2, type="HC1"))
+
+# Check for model specification
+# construct added variable (partial regression) plots
+avPlots(m2)
+
+# Check for linearity
+# plot residual vs fitted val and all predictors using car package
 residualPlots(m2)
 
+# test for curvature
+
+# Check for independence
 # scatter plot of residuals vs school id
 plot(m2$resid ~ d$snum)
-
 # plot(m2$resid[-1] ~ m2$resid[-400])
+
+# Check for normality
 # normal quantile to quantile plot
 qqnorm(m2$resid)
 qqline(m2$resid)
 
+# Check for collinearity
+# use function vif from package car 
 # calculate variance inflation factor
 car::vif(m2)
-
-# construct added variable (partial regression) plots
-avPlots(m2)
 
 class(d$api00)
 class(d$yr_rnd)
